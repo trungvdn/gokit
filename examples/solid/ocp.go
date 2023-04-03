@@ -1,83 +1,76 @@
 package main
 
-import (
-	"io/ioutil"
-	"net/http"
+import "fmt"
 
-	"gopkg.in/yaml.v2"
-)
-
-type City struct {
+type Apple struct {
+	name   string
+	color  string
+	weigth int
 }
 
-func GetCities(sourceType string, source string) ([]City, error) {
-	var data []byte
-	var err error
-
-	if sourceType == "file" {
-		data, err = ioutil.ReadFile(source)
-		if err != nil {
-			return nil, err
+func filterColor(listApple []Apple, color string, weight int) []Apple {
+	filteredApple := []Apple{}
+	for i := 0; i < len(listApple); i++ {
+		if listApple[i].color == color && listApple[i].weigth >= weight {
+			filteredApple = append(filteredApple, listApple[i])
 		}
-	} else if sourceType == "link" {
-		resp, err := http.Get(source)
-		if err != nil {
-			return nil, err
+	}
+	return filteredApple
+}
+
+// type Filter interface {
+// 	filter(apple Apple) bool
+// }
+
+func filterColor2(listApple []Apple, filter Filter) []Apple {
+	filteredApple := []Apple{}
+	for i := 0; i < len(listApple); i++ {
+		if filter(listApple[i]) {
+			filteredApple = append(filteredApple, listApple[i])
 		}
+	}
+	return filteredApple
+}
 
-		data, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
+type Filter func(apple Apple) bool
+
+type FilterColorAndWeight struct {
+	color  string
+	weigth int
+}
+
+func (fc *FilterColorAndWeight) filter(apple Apple) bool {
+	if apple.color == fc.color && apple.weigth >= fc.weigth {
+		return true
+	}
+	return false
+}
+
+func ImplementOCP() {
+	list := []Apple{
+		{
+			name:   "Yasuo",
+			color:  "Red",
+			weigth: 100,
+		},
+		{
+			name:   "Zoe",
+			color:  "Pink",
+			weigth: 98,
+		},
+		{
+			name:   "Maphite",
+			color:  "Red",
+			weigth: 144,
+		},
+	}
+
+	filteredApple := filterColor2(list, func(apple Apple) bool {
+		if apple.color == "Red" && apple.weigth >= 100 {
+			return true
 		}
-		defer resp.Body.Close()
-	}
+		return false
+	})
 
-	var cities []City
-	err = yaml.Unmarshal(data, &cities)
-	if err != nil {
-		return nil, err
-	}
-
-	return cities, nil
-}
-
-type DataReader func(source string) ([]byte, error)
-
-func ReadFromFile(fileName string) ([]byte, error) {
-	data, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
-}
-
-func ReadFromLink(link string) ([]byte, error) {
-	resp, err := http.Get(link)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	return data, nil
-}
-
-func GetCitiesOCP(reader DataReader, source string) ([]City, error) {
-	data, err := reader(source)
-	if err != nil {
-		return nil, err
-	}
-
-	var cities []City
-	err = yaml.Unmarshal(data, &cities)
-	if err != nil {
-		return nil, err
-	}
-
-	return cities, nil
+	fmt.Println(filteredApple)
 }

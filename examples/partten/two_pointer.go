@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func main() {
+func two_pointer() {
 	nums := []int{3, 7, 1, 2, 8, 4, 5}
 	// 1,2,3,4,5,7,8
 	fmt.Println(findSumOfThree(nums, 10))
