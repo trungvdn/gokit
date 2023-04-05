@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-//Multiple functions can read from the same channel until that channel is closed
+// Multiple functions can read from the same channel until that channel is closed
 func main() {
 	in := gen(2, 3)
 
